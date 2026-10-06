@@ -1,0 +1,41 @@
+"""matrix: dense matrix kernels built on the standard library."""
+
+from .core import (
+    EPS,
+    LUResult,
+    MatrixError,
+    as_matrix,
+    as_vector,
+    back_substitution,
+    condition_estimate,
+    determinant,
+    forward_substitution,
+    identity,
+    inverse,
+    lu_decompose,
+    lu_solve,
+    matmul,
+    rank,
+    residual,
+    transpose,
+)
+
+__all__ = [
+    "EPS",
+    "LUResult",
+    "MatrixError",
+    "as_matrix",
+    "as_vector",
+    "back_substitution",
+    "condition_estimate",
+    "determinant",
+    "forward_substitution",
+    "identity",
+    "inverse",
+    "lu_decompose",
+    "lu_solve",
+    "matmul",
+    "rank",
+    "residual",
+    "transpose",
+]
