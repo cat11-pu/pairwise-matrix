@@ -112,12 +112,12 @@ def matmul(a, b):
 
 def _pivot_row(lu, col, n):
     """The row at or below the diagonal that supplies the next pivot."""
-    best = 0.0
+    best = -1.0
     chosen = col
     for row in range(col, n):
-        candidate = lu[row][col]
-        if candidate > best:
-            best = candidate
+        magnitude = abs(lu[row][col])
+        if magnitude > best:
+            best = magnitude
             chosen = row
     return chosen
 
@@ -146,10 +146,11 @@ def lu_decompose(a, tol=EPS):
         pivot_row = _pivot_row(lu, col, n)
         if pivot_row != col:
             lu[col], lu[pivot_row] = lu[pivot_row], lu[col]
+            perm[col], perm[pivot_row] = perm[pivot_row], perm[col]
             swaps += 1
         pivot = lu[col][col]
         pivots[col] = pivot
-        if pivot == 0.0:
+        if abs(pivot) <= tol:
             singular = True
             break
         for row in range(col + 1, n):
@@ -173,7 +174,7 @@ def forward_substitution(lower, b):
     for row in range(n):
         total = float(b[row])
         for col in range(row):
-            total += lower[row][col] * y[col]
+            total -= lower[row][col] * y[col]
         y[row] = total
     return y
 
@@ -184,7 +185,7 @@ def back_substitution(upper, b):
     if n != len(b):
         raise MatrixError("the right hand side does not match the matrix")
     x = [0.0] * n
-    for row in range(n - 1, 0, -1):
+    for row in range(n - 1, -1, -1):
         total = float(b[row])
         for col in range(row + 1, n):
             total -= upper[row][col] * x[col]
@@ -220,14 +221,14 @@ def determinant(a, tol=EPS):
     if result.singular:
         raise MatrixError("a singular matrix has no determinant")
     product = math.prod(result.pivots)
-    return product * -1.0 ** result.swaps
+    return product * ((-1.0) ** result.swaps)
 
 
 def rank(a, tol=EPS):
     """The rank of a square matrix, counted from the pivots of its
     factorization."""
     result = lu_decompose(a, tol)
-    return sum(1 for pivot in result.pivots if pivot != 0.0)
+    return sum(1 for pivot in result.pivots if abs(pivot) > tol)
 
 
 def inverse(a, tol=EPS):
@@ -253,7 +254,7 @@ def condition_estimate(a, tol=EPS):
     if result.singular:
         return float("inf")
     magnitudes = [abs(pivot) for pivot in result.pivots]
-    return min(magnitudes) / max(magnitudes)
+    return max(magnitudes) / min(magnitudes)
 
 
 def residual(a, x, b):
